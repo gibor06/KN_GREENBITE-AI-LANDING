@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  Shield, 
   TrendingDown, 
   Brain, 
   Clock, 
@@ -10,34 +9,49 @@ import {
   CheckCircle2, 
   ArrowRight, 
   Sparkles, 
-  MapPin, 
   User, 
   Store, 
   Mail,
   ChevronRight,
-  TrendingUp,
   Menu,
   X,
-  Percent,
-  Calendar,
   DollarSign,
   Activity,
-  Award
+  Award,
+  Play,
+  Check
 } from 'lucide-react';
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [role, setRole] = useState('student');
+  
+  // Registration state
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [storeName, setStoreName] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
-  
+
+  // Active section scroll spy
   const [activeSection, setActiveSection] = useState('');
 
+  // AI Demo Playground State
+  const [selectedFood, setSelectedFood] = useState('com_tam');
+  const [remainingQty, setRemainingQty] = useState(12);
+  const [hoursToClose, setHoursToClose] = useState(1.5);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [demoResult, setDemoResult] = useState(null);
+
+  const foodCatalog = {
+    com_tam: { name: "Cơm tấm sườn bì chả", price: 40000, type: "Món mặn", image: "🍛" },
+    hu_tieu: { name: "Hủ tiếu Nam Vang", price: 35000, type: "Món nước", image: "🍜" },
+    banh_mi: { name: "Bánh mì đặc biệt", price: 25000, type: "Món khô", image: "🥖" },
+    tra_sua: { name: "Trà sữa Thái đỏ", price: 22000, type: "Đồ uống", image: "🍹" }
+  };
+
   useEffect(() => {
-    const sections = ['problem', 'solution', 'features', 'how-it-works', 'survey', 'audience'];
+    const sections = ['problem', 'timing', 'solution', 'features', 'ai-demo', 'business', 'roadmap'];
     
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 220; // Offset for sticky header
@@ -93,6 +107,47 @@ export default function LandingPage() {
     },
   ];
 
+  const handleCalculateAI = () => {
+    setIsCalculating(true);
+    setDemoResult(null);
+    
+    setTimeout(() => {
+      const foodItem = foodCatalog[selectedFood];
+      
+      // Surplus risk calculation logic
+      let riskPercent = Math.min(Math.round((remainingQty / 15) * 50 + (4 - hoursToClose) * 12), 98);
+      if (riskPercent < 20) riskPercent = 20;
+
+      // Recommended Discount calculation logic
+      let discount = 20;
+      if (riskPercent > 70) {
+        discount = 30;
+      } else if (riskPercent > 40) {
+        discount = 25;
+      }
+      
+      const rescuePrice = foodItem.price * (1 - discount / 100);
+      
+      // Food Risk Score based on category and remaining hours
+      let riskScore;
+      if (foodItem.type === "Món nước") {
+        riskScore = 0.25 - (hoursToClose * 0.03); // higher risk for soup
+      } else {
+        riskScore = 0.15 - (hoursToClose * 0.02);
+      }
+      if (riskScore < 0.05) riskScore = 0.05;
+      
+      setDemoResult({
+        surplusRisk: riskPercent,
+        recommendedDiscount: discount,
+        rescuePrice: rescuePrice.toLocaleString('vi-VN') + "đ",
+        riskScore: riskScore.toFixed(2),
+        riskLevel: riskScore > 0.2 ? "Trung bình" : "Rất thấp"
+      });
+      setIsCalculating(false);
+    }, 850);
+  };
+
   const handleRegister = (e) => {
     e.preventDefault();
     if (email && name) {
@@ -137,15 +192,16 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              {/* Desktop Nav */}
-              <nav className="hidden md:flex space-x-8 text-sm font-bold">
+              {/* Desktop Nav (Matching uploaded image options) */}
+              <nav className="hidden lg:flex space-x-6 xl:space-x-8 text-xs xl:text-sm font-bold">
                 {[
                   { name: "Vấn đề", id: "problem" },
+                  { name: "Thời điểm", id: "timing" },
                   { name: "Giải pháp", id: "solution" },
-                  { name: "Tính năng", id: "features" },
-                  { name: "Vận hành", id: "how-it-works" },
-                  { name: "Khảo sát", id: "survey" },
-                  { name: "Đối tác", id: "audience" }
+                  { name: "Công nghệ", id: "features" },
+                  { name: "Demo AI", id: "ai-demo" },
+                  { name: "Kinh doanh", id: "business" },
+                  { name: "Lộ trình", id: "roadmap" }
                 ].map((item) => (
                   <button 
                     key={item.id}
@@ -160,7 +216,7 @@ export default function LandingPage() {
               </nav>
 
               {/* Desktop CTA */}
-              <div className="hidden md:flex items-center space-x-4">
+              <div className="hidden lg:flex items-center space-x-4">
                 <button 
                   onClick={() => {
                     setRole('merchant');
@@ -182,7 +238,7 @@ export default function LandingPage() {
               </div>
 
               {/* Mobile menu button */}
-              <div className="md:hidden">
+              <div className="lg:hidden">
                 <button 
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="text-slate-400 hover:text-white p-2 focus:outline-none bg-slate-900 border border-slate-800 rounded-xl"
@@ -195,14 +251,15 @@ export default function LandingPage() {
 
           {/* Mobile menu dropdown */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl rounded-b-3xl px-6 py-6 space-y-4">
+            <div className="lg:hidden border-t border-slate-800/80 bg-slate-950/95 backdrop-blur-xl rounded-b-3xl px-6 py-6 space-y-4">
               {[
                 { name: "Vấn đề", id: "problem" },
+                { name: "Thời điểm", id: "timing" },
                 { name: "Giải pháp", id: "solution" },
-                { name: "Tính năng", id: "features" },
-                { name: "Vận hành", id: "how-it-works" },
-                { name: "Số liệu khảo sát", id: "survey" },
-                { name: "Lợi ích đối tác", id: "audience" }
+                { name: "Công nghệ", id: "features" },
+                { name: "Demo AI", id: "ai-demo" },
+                { name: "Kinh doanh", id: "business" },
+                { name: "Lộ trình", id: "roadmap" }
               ].map((item) => (
                 <button 
                   key={item.id}
@@ -248,7 +305,7 @@ export default function LandingPage() {
             <div className="lg:col-span-7 space-y-8 text-left relative">
               <div className="inline-flex items-center space-x-2 bg-emerald-950/60 border border-emerald-500/30 px-4 py-2 rounded-full text-emerald-400 font-bold text-xs tracking-wider uppercase shadow-inner">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                <span>Smart Food Rescue Platform for Campus F&B</span>
+                <span>AI Food Rescue Platform for Campus F&B</span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[1.05] text-white">
@@ -295,11 +352,8 @@ export default function LandingPage() {
 
             {/* Right Visual Phone Mockup Column */}
             <div className="lg:col-span-5 relative flex justify-center">
-              
-              {/* Glow Behind Phone */}
               <div className="absolute -z-10 w-72 h-72 rounded-full bg-emerald-500/10 blur-[80px] animate-pulse" />
               
-              {/* iPhone CSS Wrapper */}
               <div className="relative w-[310px] h-[620px] bg-slate-950 rounded-[48px] border-[8px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] p-3.5 flex flex-col justify-between overflow-hidden">
                 {/* Dynamic Island / Notch */}
                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-slate-950 rounded-full z-20 flex items-center justify-center">
@@ -308,7 +362,6 @@ export default function LandingPage() {
 
                 {/* Inner Screen */}
                 <div className="flex-1 bg-slate-900 rounded-[34px] overflow-hidden p-4 pt-6 flex flex-col justify-between text-left space-y-4">
-                  {/* Internal Status Bar */}
                   <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold px-1">
                     <span>9:41 AM</span>
                     <span className="flex items-center space-x-1">
@@ -317,10 +370,9 @@ export default function LandingPage() {
                     </span>
                   </div>
 
-                  {/* App Branding */}
                   <div className="flex justify-between items-center mt-2">
                     <div>
-                      <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">GreenBiteAI Rescue</span>
+                      <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">GreenBite Rescue</span>
                       <h4 className="text-sm font-extrabold text-white">Món ngon quanh bạn</h4>
                     </div>
                     <div className="w-7 h-7 rounded-lg bg-emerald-950 border border-emerald-500/30 flex items-center justify-center">
@@ -328,7 +380,7 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  {/* Live Feed simulated items */}
+                  {/* Live Feed */}
                   <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 no-scrollbar">
                     {sampleFoods.map((food, idx) => (
                       <div 
@@ -375,7 +427,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Float Widget 1 (CO2) */}
               <div className="absolute top-20 -left-12 bg-slate-950/90 border border-slate-800 p-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 animate-float max-w-[160px]">
                 <div className="w-8 h-8 rounded-xl bg-emerald-950 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                   <Leaf className="w-4 h-4" />
@@ -386,7 +437,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Float Widget 2 (Discount badge) */}
               <div className="absolute bottom-28 -right-10 bg-slate-950/90 border border-slate-800 p-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 animate-float-reverse max-w-[160px]">
                 <div className="w-8 h-8 rounded-xl bg-orange-950 border border-orange-500/30 flex items-center justify-center text-orange-400">
                   <TrendingDown className="w-4 h-4" />
@@ -396,14 +446,13 @@ export default function LandingPage() {
                   <p className="text-xs font-black text-white">Đến 30% giá</p>
                 </div>
               </div>
-
             </div>
 
           </div>
         </div>
       </section>
 
-      {/* PROBLEM SECTION */}
+      {/* 1. PROBLEM SECTION */}
       <section id="problem" className="py-24 bg-slate-950 border-y border-slate-800/40 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -440,9 +489,9 @@ export default function LandingPage() {
             ].map((prob, idx) => (
               <div 
                 key={idx}
-                className={`bg-slate-900/60 border border-slate-800/80 rounded-3xl p-8 text-left space-y-6 relative overflow-hidden group hover:border-slate-700 transition-all duration-300`}
+                className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-8 text-left space-y-6 relative overflow-hidden group hover:border-slate-700 transition-all duration-300"
               >
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${prob.color} blur-2xl opacity-40`} />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-800/10 to-transparent border-slate-800/20 blur-2xl opacity-40" />
                 <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center">
                   <prob.icon className={`w-6 h-6 ${prob.color.split(' ').pop()}`} />
                 </div>
@@ -455,7 +504,65 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SOLUTION SECTION */}
+      {/* 2. TIMING SECTION (Why Now?) */}
+      <section id="timing" className="py-24 bg-slate-900/50 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
+            <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">Yếu tố thời điểm</span>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              Tại sao lại là thời điểm này? (Why Now?)
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+              Sự hội tụ của công nghệ số, xu hướng ESG và nhu cầu thực tiễn biến GreenBiteAI trở thành mô hình cấp thiết ngay lúc này.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "1. Sự phổ biến của thanh toán & định danh QR",
+                desc: "100% sinh viên ngày nay quen thuộc với việc quét mã QR và giao dịch không tiền mặt. Điều này giúp thao tác nhận món tự động tại quầy trở nên tự nhiên và nhanh chóng hơn bao giờ hết.",
+                metric: "98% Sinh viên quét QR hàng ngày",
+                icon: QrCode
+              },
+              {
+                title: "2. Áp lực thắt chặt chi tiêu học đường",
+                desc: "Chi phí sinh hoạt và giá thực phẩm leo thang gây áp lực nặng nề lên ngân sách của sinh viên đại học. Bữa ăn tiết kiệm dưới 25.000đ trở thành lựa chọn thiết yếu hàng đầu.",
+                metric: "86.5% Sẵn sàng đón nhận giải pháp",
+                icon: DollarSign
+              },
+              {
+                title: "3. Cam kết chuyển đổi xanh & ESG",
+                desc: "Các trường đại học ngày càng quan tâm đến việc xây dựng 'Green Campus' và chuyển đổi số F&B. Dự án trực tiếp đồng hành hỗ trợ mục tiêu giảm thiểu 1/3 rác thải thực phẩm của quốc gia.",
+                metric: "Giảm 3.1 tấn CO2 (Quy đổi pilot)",
+                icon: Leaf
+              }
+            ].map((time, idx) => (
+              <div 
+                key={idx}
+                className="bg-slate-950/60 border border-slate-800/80 p-8 rounded-3xl text-left space-y-5 flex flex-col justify-between hover:border-slate-700 transition-all duration-300"
+              >
+                <div className="space-y-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <time.icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">{time.title}</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{time.desc}</p>
+                </div>
+                <div className="pt-4 border-t border-slate-800/60">
+                  <span className="text-xs text-emerald-400 font-extrabold bg-emerald-950/80 border border-emerald-500/20 px-3 py-1.5 rounded-lg">
+                    {time.metric}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* 3. SOLUTION SECTION */}
       <section id="solution" className="py-24 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -477,7 +584,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right Column (High-end list layout) */}
+            {/* Right Column */}
             <div className="lg:col-span-7 space-y-6">
               {[
                 {
@@ -519,7 +626,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* BENTO GRID FEATURE SECTION */}
+      {/* 4. TECH / BENTO FEATURE SECTION */}
       <section id="features" className="py-24 bg-slate-950/40 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -533,7 +640,6 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             
             {/* Card 1: AI Surplus Forecasting (Large - 8 cols md) */}
@@ -546,7 +652,6 @@ export default function LandingPage() {
                 </p>
               </div>
               
-              {/* Graphic element for AI prediction */}
               <div className="bg-slate-950/80 border border-slate-800/60 p-4.5 rounded-2xl space-y-3">
                 <div className="flex justify-between items-center text-xs text-slate-500">
                   <span className="font-bold">Đồ thị dự đoán lượng tồn dư (Món Cơm gà)</span>
@@ -631,7 +736,6 @@ export default function LandingPage() {
 
           </div>
 
-          {/* Special Disclaimer Note */}
           <div className="mt-12 bg-blue-950/30 border border-blue-800/30 rounded-2xl p-5 max-w-4xl mx-auto flex items-start space-x-3.5 text-left">
             <AlertCircle className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
             <div className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -642,63 +746,209 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS SECTION */}
-      <section id="how-it-works" className="py-24 bg-slate-950 border-y border-slate-800/40 relative">
+      {/* 5. INTERACTIVE AI PLAYGROUND (Demo AI) */}
+      <section id="ai-demo" className="py-24 bg-slate-900 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-96 h-96 rounded-full bg-emerald-500/5 blur-[120px]" />
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-24">
-            <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">Quy trình đơn giản</span>
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">Trải nghiệm tương tác</span>
             <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-              Vận hành giải cứu thực phẩm
+              Giả lập Thuật toán AI Playground
             </h2>
             <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
-              Chỉ với 5 bước đơn giản trong Vận hành cứu trợ món ngon cuối ngày cùng GreenBiteAI.
+              Hãy thử đóng vai chủ quán ăn: chọn món ăn, cấu hình lượng tồn và thời gian bán để xem AI của GreenBiteAI tính toán tự động.
             </p>
           </div>
 
-          {/* Grid timeline layout */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 relative">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-10 max-w-4xl mx-auto grid md:grid-cols-12 gap-8 shadow-2xl">
+            
+            {/* Config Left Column */}
+            <div className="md:col-span-6 space-y-6 text-left">
+              <h3 className="text-lg font-bold text-white flex items-center">
+                <Brain className="w-5 h-5 text-emerald-400 mr-2" /> Cấu hình cửa hàng cuối ngày
+              </h3>
+              
+              {/* Select Food */}
+              <div className="space-y-2">
+                <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">Chọn món ăn cần đăng</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.keys(foodCatalog).map((key) => (
+                    <button
+                      type="button"
+                      key={key}
+                      onClick={() => setSelectedFood(key)}
+                      className={`p-3 rounded-2xl border text-left transition-all ${
+                        selectedFood === key 
+                          ? 'bg-emerald-950/80 border-emerald-500 text-white shadow-lg' 
+                          : 'bg-slate-900 border-slate-800/80 text-slate-400 hover:border-slate-700'
+                      }`}
+                    >
+                      <span className="text-xl block mb-1">{foodCatalog[key].image}</span>
+                      <span className="text-xs font-bold block truncate">{foodCatalog[key].name}</span>
+                      <span className="text-[10px] text-slate-500 block">Gốc: {foodCatalog[key].price.toLocaleString('vi-VN')}đ</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantity Slider */}
+              <div className="space-y-2.5">
+                <div className="flex justify-between text-xs text-slate-400">
+                  <span className="font-bold uppercase tracking-wider">Số lượng phần ăn còn dư</span>
+                  <span className="text-emerald-400 font-black">{remainingQty} phần</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="2" 
+                  max="30" 
+                  value={remainingQty}
+                  onChange={(e) => setRemainingQty(parseInt(e.target.value))}
+                  className="w-full accent-emerald-500 bg-slate-900 rounded-lg h-2 cursor-pointer"
+                />
+              </div>
+
+              {/* Time Slider */}
+              <div className="space-y-2.5">
+                <div className="flex justify-between text-xs text-slate-400">
+                  <span className="font-bold uppercase tracking-wider">Thời gian đến khi đóng cửa</span>
+                  <span className="text-orange-400 font-black">{hoursToClose} giờ</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0.5" 
+                  max="4" 
+                  step="0.5"
+                  value={hoursToClose}
+                  onChange={(e) => setHoursToClose(parseFloat(e.target.value))}
+                  className="w-full accent-orange-500 bg-slate-900 rounded-lg h-2 cursor-pointer"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCalculateAI}
+                disabled={isCalculating}
+                className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-600 hover:to-teal-500 text-slate-950 font-black rounded-2xl text-sm transition-all shadow-lg flex items-center justify-center space-x-2 disabled:opacity-60"
+              >
+                {isCalculating ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                    <span>AI đang phân tích...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 fill-current text-slate-950" />
+                    <span>Chạy thuật toán dự báo AI</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Results Right Column */}
+            <div className="md:col-span-6 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between text-left min-h-[300px]">
+              {demoResult ? (
+                <div className="space-y-6 flex-1 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Kết quả phân tích</span>
+                    
+                    {/* Gauge metrics */}
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+                        <span className="text-[9px] text-slate-500 font-bold block uppercase">Nguy cơ ế ẩm</span>
+                        <span className="text-xl font-black text-rose-400 mt-1 block">{demoResult.surplusRisk}%</span>
+                      </div>
+                      <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+                        <span className="text-[9px] text-slate-500 font-bold block uppercase">Rủi ro thực phẩm</span>
+                        <span className="text-xl font-black text-blue-400 mt-1 block">{demoResult.riskScore}</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-slate-950/80 border border-slate-850 rounded-2xl space-y-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-400">Đề xuất mức giảm giá:</span>
+                        <span className="text-orange-400 font-extrabold">Giảm {demoResult.recommendedDiscount}%</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm border-t border-slate-800/80 pt-2">
+                        <span className="text-white font-bold">Giá cứu trợ (Rescue):</span>
+                        <span className="text-emerald-400 font-black text-lg">{demoResult.rescuePrice}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-emerald-950/20 border border-emerald-900/30 p-3 rounded-xl flex items-start space-x-2.5 text-xs text-emerald-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <p>Khung giá đảm bảo thu hồi vốn nguyên liệu tối đa và tăng khả năng bán hết thêm 40%.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3 p-6">
+                  <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 border border-slate-700/50">
+                    <Activity className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">Chưa chạy phân tích</h4>
+                    <p className="text-xs text-slate-500 max-w-[240px] mx-auto mt-1 leading-normal">
+                      Hãy tùy chỉnh thông số ở cột trái và bấm nút chạy thuật toán để hiển thị đề xuất từ AI.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 6. BUSINESS SECTION (Business Model) */}
+      <section id="business" className="py-24 bg-slate-950 border-t border-slate-800/40 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
+            <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">Mô hình kinh doanh</span>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              Mô hình doanh thu bền vững
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+              GreenBiteAI phát triển dựa trên cơ cấu tài chính ổn định, tạo ra giá trị thiết thực và chia sẻ lợi ích cùng các đối tác F&B.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                step: "01",
-                title: "Đăng món dư",
-                desc: "Chủ quán chụp ảnh món ăn và đăng số lượng phần ăn dư thừa vào cuối ngày lên hệ thống."
+                title: "Phí dịch vụ trên đơn hàng (Commission)",
+                desc: "Thu phí hoa hồng nhỏ từ 8% đến 10% trên mỗi phần ăn giải cứu thành công. Mô hình dựa trên hiệu quả thực tế: Quán bán được mới mất phí.",
+                benefit: "Thu hồi 90% dòng tiền vốn dư",
+                icon: DollarSign
               },
               {
-                step: "02",
-                title: "AI gợi ý mức giá",
-                desc: "Hệ thống tự động đề xuất số phần tối ưu và mức giá chiết khấu hợp lý nhất."
+                title: "Quảng cáo Xanh ưu tiên (Green Ad)",
+                desc: "Cung cấp gói hiển thị quảng bá ưu tiên cho các quán ăn có tỷ lệ giải cứu thức ăn cao và phản hồi chất lượng tốt, giúp tăng uy tín thương hiệu học đường.",
+                benefit: "Tăng 25% doanh số món thông thường",
+                icon: Award
               },
               {
-                step: "03",
-                title: "Sinh viên đặt chỗ",
-                desc: "Sinh viên xem danh sách các món gần mình, chọn khung giờ nhận thuận tiện và xác nhận đặt."
-              },
-              {
-                step: "04",
-                title: "Nhận món bằng QR",
-                desc: "Đến cửa hàng đúng giờ, đưa mã QR cho nhân viên quét duyệt và thanh toán nhận món."
-              },
-              {
-                step: "05",
-                title: "Ghi nhận đóng góp",
-                desc: "Hệ thống cộng điểm xanh cho sinh viên và cập nhật doanh thu phục hồi cho quán ăn."
+                title: "Phân tích dữ liệu & Báo cáo (SaaS Dashboard)",
+                desc: "Cung cấp gói báo cáo nâng cao phân tích hành vi mua sắm của sinh viên, dự báo nguyên liệu dài hạn cho các canteen chuỗi hoặc căn tin trường học.",
+                benefit: "Tối ưu hóa 15% hao hụt chuẩn bị",
+                icon: Activity
               }
-            ].map((step, idx) => (
+            ].map((model, idx) => (
               <div 
                 key={idx}
-                className="bg-slate-900/40 border border-slate-800/60 p-6 rounded-3xl space-y-4 relative group hover:border-slate-700 transition-all duration-300 flex flex-col justify-between text-left"
+                className="bg-slate-900/50 border border-slate-850 p-8 rounded-3xl text-left space-y-6 hover:border-slate-700 transition-all duration-300 flex flex-col justify-between"
               >
-                <div>
-                  <span className="text-3xl font-extrabold bg-gradient-to-br from-emerald-400 to-teal-400 bg-clip-text text-transparent block mb-4">
-                    {step.step}
-                  </span>
-                  <h4 className="font-extrabold text-white text-base leading-tight group-hover:text-emerald-400 transition-colors">
-                    {step.title}
-                  </h4>
-                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mt-2.5">
-                    {step.desc}
-                  </p>
+                <div className="space-y-4">
+                  <div className="w-11 h-11 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-emerald-400">
+                    <model.icon className="w-5.5 h-5.5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white leading-snug">{model.title}</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{model.desc}</p>
+                </div>
+                <div className="pt-4 border-t border-slate-800 flex items-center text-xs text-emerald-400 font-extrabold space-x-1.5">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{model.benefit}</span>
                 </div>
               </div>
             ))}
@@ -707,10 +957,65 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* STATS SURVEY SECTION */}
-      <section id="survey" className="py-24 relative">
+      {/* 7. ROADMAP SECTION */}
+      <section id="roadmap" className="py-24 bg-slate-900/50 border-t border-slate-800/40 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-24">
+            <span className="text-xs font-bold tracking-widest text-emerald-400 uppercase">Kế hoạch phát triển</span>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              Lộ trình triển khai dự án (Roadmap)
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+              Kế hoạch hành động cụ thể từ giai đoạn pilot địa phương đến mục tiêu số hóa ẩm thực xanh học đường toàn quốc.
+            </p>
+          </div>
+
+          {/* Stepper Timeline */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+            {[
+              {
+                phase: "Q3 / 2026",
+                title: "Khảo sát & Xây dựng MVP",
+                desc: "Hoàn thành nghiên cứu khảo sát nhu cầu sinh viên và xây dựng thành công phiên bản phần mềm thử nghiệm ban đầu (MVP) tại HUIT."
+              },
+              {
+                phase: "Q4 / 2026",
+                title: "Vận hành Pilot HUIT",
+                desc: "Hợp tác thí điểm với 10 quán F&B và canteen quanh Đại học Công thương TP.HCM. Đạt mục tiêu kết nối 500 sinh viên tích cực đầu tiên."
+              },
+              {
+                phase: "Q1 / 2027",
+                title: "Nhân rộng liên trường",
+                desc: "Mở rộng hệ thống liên kết tới 3 trường lân cận tại Tân Phú và Làng Đại học Thủ Đức. Nâng cấp các tính năng dự báo AI chuyên sâu."
+              },
+              {
+                phase: "Q2 / 2027",
+                title: "Gamification & ESG Data",
+                desc: "Ra mắt hệ thống tích điểm thưởng, bảng xếp hạng xanh giữa các lớp học, và cung cấp dữ liệu phát thải CO2 chính thức cho nhà trường."
+              }
+            ].map((step, idx) => (
+              <div 
+                key={idx}
+                className="bg-slate-950/60 border border-slate-800/80 p-6 rounded-3xl text-left space-y-4 relative hover:border-slate-700 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
+                    {step.phase}
+                  </span>
+                  <h4 className="font-extrabold text-white text-base leading-tight mt-3">{step.title}</h4>
+                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mt-2.5">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* STATS SURVEY SECTION (Moved for flow but kept on page) */}
+      <section className="py-24 bg-slate-950 border-t border-slate-800/40 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-16 items-center">
             
             {/* Left Content Column */}
@@ -739,7 +1044,7 @@ export default function LandingPage() {
               ].map((stat, idx) => (
                 <div 
                   key={idx}
-                  className="bg-slate-950 border border-slate-800/80 p-8 rounded-3xl text-left space-y-4 hover:border-emerald-500/30 transition-all duration-300"
+                  className="bg-slate-900/60 border border-slate-800/80 p-8 rounded-3xl text-left space-y-4 hover:border-emerald-500/30 transition-all duration-300"
                 >
                   <div className="flex justify-between items-start">
                     <span className="text-4xl sm:text-5xl font-black tracking-tight text-emerald-400 block">
@@ -758,12 +1063,11 @@ export default function LandingPage() {
             </div>
 
           </div>
-
         </div>
       </section>
 
       {/* AUDIENCE BENEFIT SECTION */}
-      <section id="audience" className="py-24 bg-slate-950 border-t border-slate-800/40 relative">
+      <section className="py-24 bg-slate-900/50 border-t border-slate-800/40 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto space-y-4 mb-20">
@@ -865,8 +1169,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* GREEN IMPACT DASHBOARD DEMO SECTION */}
-      <section className="py-24 relative overflow-hidden">
+      {/* GREEN IMPACT PANEL */}
+      <section className="py-24 bg-slate-950 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="grid lg:grid-cols-12 gap-16 items-center">
@@ -1118,9 +1422,12 @@ export default function LandingPage() {
               <h4 className="font-extrabold text-xs text-white uppercase tracking-wider">Thông tin thêm</h4>
               <ul className="space-y-2.5 text-xs text-slate-400">
                 <li><button onClick={() => scrollToSection('problem')} className="hover:text-emerald-400 transition-colors">Thực trạng vấn đề</button></li>
+                <li><button onClick={() => scrollToSection('timing')} className="hover:text-emerald-400 transition-colors">Thời điểm Why Now</button></li>
                 <li><button onClick={() => scrollToSection('solution')} className="hover:text-emerald-400 transition-colors">Giải pháp đề xuất</button></li>
                 <li><button onClick={() => scrollToSection('features')} className="hover:text-emerald-400 transition-colors">Cốt lõi công nghệ</button></li>
-                <li><button onClick={() => scrollToSection('how-it-works')} className="hover:text-emerald-400 transition-colors">Vận hành giải cứu</button></li>
+                <li><button onClick={() => scrollToSection('ai-demo')} className="hover:text-emerald-400 transition-colors">Giả lập Demo AI</button></li>
+                <li><button onClick={() => scrollToSection('business')} className="hover:text-emerald-400 transition-colors">Mô hình kinh doanh</button></li>
+                <li><button onClick={() => scrollToSection('roadmap')} className="hover:text-emerald-400 transition-colors">Lộ trình giải cứu</button></li>
               </ul>
             </div>
 
