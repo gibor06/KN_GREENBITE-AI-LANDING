@@ -19,7 +19,11 @@ import {
   Activity,
   Award,
   Play,
-  Check
+  Check,
+  Utensils,
+  Soup,
+  Sandwich,
+  CupSoda
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -44,10 +48,10 @@ export default function LandingPage() {
   const [demoResult, setDemoResult] = useState(null);
 
   const foodCatalog = {
-    com_tam: { name: "Cơm tấm sườn bì chả", price: 40000, type: "Món mặn", image: "🍛" },
-    hu_tieu: { name: "Hủ tiếu Nam Vang", price: 35000, type: "Món nước", image: "🍜" },
-    banh_mi: { name: "Bánh mì đặc biệt", price: 25000, type: "Món khô", image: "🥖" },
-    tra_sua: { name: "Trà sữa Thái đỏ", price: 22000, type: "Đồ uống", image: "🍹" }
+    com_tam: { name: "Cơm tấm sườn bì chả", price: 40000, type: "Món mặn", icon: Utensils },
+    hu_tieu: { name: "Hủ tiếu Nam Vang", price: 35000, type: "Món nước", icon: Soup },
+    banh_mi: { name: "Bánh mì đặc biệt", price: 25000, type: "Món khô", icon: Sandwich },
+    tra_sua: { name: "Trà sữa Thái đỏ", price: 22000, type: "Đồ uống", icon: CupSoda }
   };
 
   useEffect(() => {
@@ -83,7 +87,7 @@ export default function LandingPage() {
       pickupTime: "18:00 - 19:00",
       risk: "Thấp",
       tag: "Bán chạy nhất",
-      image: "🍗"
+      icon: Utensils
     },
     {
       name: "Bánh mì heo quay",
@@ -93,7 +97,7 @@ export default function LandingPage() {
       pickupTime: "17:30 - 18:30",
       risk: "Thấp",
       tag: "Giòn nóng",
-      image: "🥖"
+      icon: Sandwich
     },
     {
       name: "Trà đào cam sả",
@@ -103,7 +107,7 @@ export default function LandingPage() {
       pickupTime: "18:00 - 20:00",
       risk: "Thấp",
       tag: "Mát lạnh",
-      image: "🍹"
+      icon: CupSoda
     },
   ];
 
@@ -382,28 +386,33 @@ export default function LandingPage() {
 
                   {/* Live Feed */}
                   <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 no-scrollbar">
-                    {sampleFoods.map((food, idx) => (
-                      <div 
-                        key={idx}
-                        className="bg-slate-950/70 border border-slate-800/60 p-2.5 rounded-xl flex items-center justify-between hover:border-emerald-500/30 transition-all duration-300"
-                      >
-                        <div className="flex items-center space-x-2.5">
-                          <span className="text-2xl p-1 bg-slate-900 rounded-lg">{food.image}</span>
-                          <div>
-                            <h5 className="text-xs font-bold text-white leading-tight">{food.name}</h5>
-                            <div className="flex items-center space-x-1.5 mt-0.5">
-                              <span className="text-[9px] text-slate-500 line-through">{food.oldPrice}</span>
-                              <span className="text-[10px] text-emerald-400 font-extrabold">{food.newPrice}</span>
+                    {sampleFoods.map((food, idx) => {
+                      const FoodIcon = food.icon;
+                      return (
+                        <div 
+                          key={idx}
+                          className="bg-slate-950/70 border border-slate-800/60 p-2.5 rounded-xl flex items-center justify-between hover:border-emerald-500/30 transition-all duration-300"
+                        >
+                          <div className="flex items-center space-x-2.5">
+                            <div className="p-2 bg-slate-900 rounded-lg text-emerald-400">
+                              <FoodIcon className="w-4.5 h-4.5" />
+                            </div>
+                            <div>
+                              <h5 className="text-xs font-bold text-white leading-tight">{food.name}</h5>
+                              <div className="flex items-center space-x-1.5 mt-0.5">
+                                <span className="text-[9px] text-slate-500 line-through">{food.oldPrice}</span>
+                                <span className="text-[10px] text-emerald-400 font-extrabold">{food.newPrice}</span>
+                              </div>
                             </div>
                           </div>
+                          <div className="text-right">
+                            <span className="text-[8px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-full font-bold">
+                              {food.pickupTime}
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <span className="text-[8px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded-full font-bold">
-                            {food.pickupTime}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Inner Ticket Card */}
@@ -773,22 +782,27 @@ export default function LandingPage() {
               <div className="space-y-2">
                 <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">Chọn món ăn cần đăng</label>
                 <div className="grid grid-cols-2 gap-3">
-                  {Object.keys(foodCatalog).map((key) => (
-                    <button
-                      type="button"
-                      key={key}
-                      onClick={() => setSelectedFood(key)}
-                      className={`p-3 rounded-2xl border text-left transition-all ${
-                        selectedFood === key 
-                          ? 'bg-emerald-950/80 border-emerald-500 text-white shadow-lg' 
-                          : 'bg-slate-900 border-slate-800/80 text-slate-400 hover:border-slate-700'
-                      }`}
-                    >
-                      <span className="text-xl block mb-1">{foodCatalog[key].image}</span>
-                      <span className="text-xs font-bold block truncate">{foodCatalog[key].name}</span>
-                      <span className="text-[10px] text-slate-500 block">Gốc: {foodCatalog[key].price.toLocaleString('vi-VN')}đ</span>
-                    </button>
-                  ))}
+                  {Object.keys(foodCatalog).map((key) => {
+                    const FoodIcon = foodCatalog[key].icon;
+                    return (
+                      <button
+                        type="button"
+                        key={key}
+                        onClick={() => setSelectedFood(key)}
+                        className={`p-3 rounded-2xl border text-left transition-all ${
+                          selectedFood === key 
+                            ? 'bg-emerald-950/80 border-emerald-500 text-white shadow-lg' 
+                            : 'bg-slate-900 border-slate-800/80 text-slate-400 hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="text-emerald-400 mb-1.5">
+                          <FoodIcon className="w-5.5 h-5.5" />
+                        </div>
+                        <span className="text-xs font-bold block truncate">{foodCatalog[key].name}</span>
+                        <span className="text-[10px] text-slate-500 block">Gốc: {foodCatalog[key].price.toLocaleString('vi-VN')}đ</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
